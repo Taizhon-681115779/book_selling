@@ -2,12 +2,14 @@ import express from "express";
 import config from "./config";
 import { cors } from "./middleware";
 import { connectDB } from "./database";
+import routers from "./routers/book";
 
 const app = express();
 
 // Middleware
 app.use(cors);
 app.use(express.json());
+app.use("/api/book", routers);
 
 // Connect to database
 connectDB();
