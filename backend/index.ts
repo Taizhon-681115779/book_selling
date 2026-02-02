@@ -3,13 +3,16 @@ import config from "./config";
 import { cors } from "./middleware";
 import { connectDB } from "./database";
 import routers from "./routers/book";
+import userRouter from "./routers/user";
 
 const app = express();
 
 // Middleware
 app.use(cors);
 app.use(express.json());
+
 app.use("/api/book", routers);
+app.use("/api/user", userRouter);
 
 // Connect to database
 connectDB();
