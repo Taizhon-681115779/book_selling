@@ -15,25 +15,29 @@ export default function ProductManager() {
       return [];
     }
   });
-  
+
   // State: Current form data for creating/editing products
   const [form, setForm] = useState({
-    id: '', 
-    title: '', 
-    author: '', 
-    category: '', 
-    priceNew: '', 
+    id: '',
+    title: '',
+    author: '',
+    isbn: '',
+    publisher: '',
+    year: '',
+    category: '',
+    priceNew: '',
     priceUsed: '',
-    condition: '', 
-    stock: '', 
-    rating: 5, 
-    images: [], 
+    condition: '',
+    conditionDetail: '',
+    stock: '',
+    rating: 5,
+    images: [],
     status: 'active'
   });
-  
+
   // State: Search term to filter products
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // State: ID of product being edited (null if creating new)
   const [editingId, setEditingId] = useState(null);
 
@@ -61,6 +65,7 @@ export default function ProductManager() {
       priceUsed: Number(form.priceUsed),
       stock: Number(form.stock),
       rating: Number(form.rating),
+      year: Number(form.year),
     };
 
     if (editingId) {
@@ -78,8 +83,8 @@ export default function ProductManager() {
 
     // Clear form after saving
     setForm({
-      id: '', title: '', author: '', category: '', priceNew: '', priceUsed: '',
-      condition: '', stock: '', rating: 5, images: [], status: 'active'
+      id: '', title: '', author: '', isbn: '', publisher: '', year: '', category: '', priceNew: '', priceUsed: '',
+      condition: '', conditionDetail: '', stock: '', rating: 5, images: [], status: 'active'
     });
   }
 
@@ -167,6 +172,18 @@ export default function ProductManager() {
           <input type="text" placeholder="ผู้แต่ง" value={form.author}
             onChange={(e) => setForm({ ...form, author: e.target.value })} required />
 
+          {/* ISBN input */}
+          <input type="text" placeholder="ISBN" value={form.isbn}
+            onChange={(e) => setForm({ ...form, isbn: e.target.value })} />
+
+          {/* Publisher input */}
+          <input type="text" placeholder="สำนักพิมพ์" value={form.publisher}
+            onChange={(e) => setForm({ ...form, publisher: e.target.value })} />
+
+          {/* Year input */}
+          <input type="number" placeholder="ปีที่พิมพ์" value={form.year}
+            onChange={(e) => setForm({ ...form, year: e.target.value })} />
+
           {/* Category input */}
           <input type="text" placeholder="หมวดหมู่" value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })} />
@@ -182,6 +199,10 @@ export default function ProductManager() {
           {/* Book condition input (e.g., "90%", "good", "like new") */}
           <input type="text" placeholder="สภาพ (เช่น 90%)" value={form.condition}
             onChange={(e) => setForm({ ...form, condition: e.target.value })} />
+
+          {/* Condition Detail input */}
+          <textarea placeholder="รายละเอียดสภาพ (ตำหนิ, รอยขีดเขียน)" value={form.conditionDetail}
+            onChange={(e) => setForm({ ...form, conditionDetail: e.target.value })} rows="3" style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #ddd' }} />
 
           {/* Stock quantity input */}
           <input type="number" placeholder="จำนวน" value={form.stock}
@@ -210,13 +231,15 @@ export default function ProductManager() {
           <button type="submit" className="btn-primary">
             {editingId ? 'บันทึก' : 'เพิ่ม'}
           </button>
-          
+
           {/* Cancel edit button (only shown when editing) */}
           {editingId && (
-            <button type="button" onClick={() => { setEditingId(null); setForm({
-              id: '', title: '', author: '', category: '', priceNew: '', priceUsed: '',
-              condition: '', stock: '', rating: 5, images: [], status: 'active'
-            }); }} className="btn-secondary">ยกเลิก</button>
+            <button type="button" onClick={() => {
+              setEditingId(null); setForm({
+                id: '', title: '', author: '', isbn: '', publisher: '', year: '', category: '', priceNew: '', priceUsed: '',
+                condition: '', conditionDetail: '', stock: '', rating: 5, images: [], status: 'active'
+              });
+            }} className="btn-secondary">ยกเลิก</button>
           )}
         </form>
       </div>
@@ -225,7 +248,7 @@ export default function ProductManager() {
       <div className="pm-list-section">
         {/* Active products count */}
         <h2>รายการสินค้า ({active.length})</h2>
-        
+
         {/* Search input for filtering products */}
         <input type="text" placeholder="ค้นหา..." value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)} className="search-input" />
@@ -239,7 +262,7 @@ export default function ProductManager() {
               <div key={product.id} className="pm-item">
                 {/* Product image */}
                 <img src={product.images[0] || 'https://via.placeholder.com/80'} alt={product.title} />
-                
+
                 {/* Product details */}
                 <div className="pm-item-details">
                   <h3>{product.title}</h3>
@@ -247,7 +270,7 @@ export default function ProductManager() {
                   <p>ราคามือสอง: {product.priceUsed}฿ | จำนวน: {product.stock}</p>
                   <p>หมวดหมู่: {product.category}</p>
                 </div>
-                
+
                 {/* Edit and Delete buttons */}
                 <div className="pm-item-actions">
                   <button onClick={() => handleEdit(product)} className="btn-edit">แก้ไข</button>
@@ -267,13 +290,13 @@ export default function ProductManager() {
                 <div key={product.id} className="pm-item pm-closed-item">
                   {/* Deleted product image */}
                   <img src={product.images[0] || 'https://via.placeholder.com/80'} alt={product.title} />
-                  
+
                   {/* Deleted product details */}
                   <div className="pm-item-details">
                     <h3>{product.title}</h3>
                     <p className="closed-label">ลบแล้ว</p>
                   </div>
-                  
+
                   {/* Restore button to bring product back to active */}
                   <button onClick={() => handleRestore(product.id)} className="btn-restore">คืน</button>
                 </div>

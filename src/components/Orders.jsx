@@ -15,6 +15,19 @@ export default function Orders({ orders, onBack }) {
   // State to track which order details are expanded
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // State for Admin updating tracking number
+  const [trackingNo, setTrackingNo] = useState('');
+
+  // MOCK: Handle status update (In real app, this would update backend/App state)
+  const [localOrders, setLocalOrders] = useState(orders);
+
+  function updateStatus(id, status) {
+    const updated = localOrders.map(o => o.id === id ? { ...o, status, tracking: trackingNo } : o);
+    setLocalOrders(updated);
+    setTrackingNo('');
+    alert('อัปเดตสถานะเรียบร้อย');
+  }
+
   // Show empty state if no orders exist
   if (orders.length === 0) {
     return (
@@ -33,7 +46,7 @@ export default function Orders({ orders, onBack }) {
 
       {/* List of all orders */}
       <div className="orders-list">
-        {orders.map((order) => (
+        {localOrders.map((order) => (
           <div key={order.id} className="order-card">
             {/* Order header with ID, date, and status badge */}
             <div className="order-header">
@@ -79,6 +92,30 @@ export default function Orders({ orders, onBack }) {
                 <p>{order.shipping.phone}</p>
                 <p>{order.shipping.address}</p>
                 <p>{order.shipping.province} {order.shipping.zipcode}</p>
+
+                {/* Tracking Number Display */}
+                {order.tracking && (
+                  <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#e0f2fe', borderRadius: '6px' }}>
+                    <strong>เลขพัสดุ:</strong> {order.tracking}
+                  </div>
+                )}
+
+                {/* ADMIN ACTION area (Mocked for demo) */}
+                {order.status === 'pending' && (
+                  <div style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                    <h5>สำหรับผู้ขาย:</h5>
+                    <input
+                      type="text"
+                      placeholder="เลขพัสดุ..."
+                      value={trackingNo}
+                      onChange={(e) => setTrackingNo(e.target.value)}
+                      style={{ padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px', marginRight: '0.5rem' }}
+                    />
+                    <button onClick={() => updateStatus(order.id, 'shipped')} className="btn-primary" style={{ padding: '0.5rem', width: 'auto' }}>
+                      ยืนยันการส่ง
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
