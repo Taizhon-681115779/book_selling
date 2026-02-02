@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 // ========== PRODUCT DETAIL COMPONENT ==========
 // Displays full details of a single book including multiple images and condition
 export default function ProductDetail({ product, onBack, onAddToCart }) {
-    const [mainImage, setMainImage] = useState(product.images[0] || 'https://via.placeholder.com/300');
+    // Fix unsafe access to images prop (legacy data protection)
+    const [mainImage, setMainImage] = useState((product.images && product.images.length > 0 ? product.images[0] : null) || product.image || 'https://via.placeholder.com/300');
 
     return (
         <section className="product-detail-container">
@@ -15,24 +16,26 @@ export default function ProductDetail({ product, onBack, onAddToCart }) {
                     <div className="main-image">
                         <img src={mainImage} alt={product.title} />
                     </div>
-                    <div className="thumbnail-list">
-                        {product.images.map((img, idx) => (
-                            <img
-                                key={idx}
-                                src={img}
-                                alt={`Thumbnail ${idx}`}
-                                className={mainImage === img ? 'active' : ''}
-                                onClick={() => setMainImage(img)}
-                            />
-                        ))}
-                    </div>
+                    {product.images && product.images.length > 0 && (
+                        <div className="thumbnail-list">
+                            {product.images.map((img, idx) => (
+                                <img
+                                    key={idx}
+                                    src={img}
+                                    alt={`Thumbnail ${idx}`}
+                                    className={mainImage === img ? 'active' : ''}
+                                    onClick={() => setMainImage(img)}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Info Section */}
                 <div className="product-info">
                     <h1>{product.title}</h1>
                     <p className="author">โดย {product.author}</p>
-                    <div className="rating">⭐ {product.rating}</div>
+                    <div className="rating">⭐ {product.rating || '-'}</div>
 
                     <div className="prices-large">
                         <span className="price-new">ปก: {product.priceNew}฿</span>
@@ -43,7 +46,7 @@ export default function ProductDetail({ product, onBack, onAddToCart }) {
                         <p><strong>ISBN:</strong> {product.isbn || '-'}</p>
                         <p><strong>สำนักพิมพ์:</strong> {product.publisher || '-'}</p>
                         <p><strong>ปีที่พิมพ์:</strong> {product.year || '-'}</p>
-                        <p><strong>หมวดหมู่:</strong> {product.category}</p>
+                        <p><strong>หมวดหมู่:</strong> {Array.isArray(product.category) ? product.category.join(', ') : product.category}</p>
                         <p><strong>จำนวนคงเหลือ:</strong> {product.stock} เล่ม</p>
                     </div>
 

@@ -196,17 +196,29 @@ body {
 }
 
 /* Login Styles */
-.login-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #fff700 10%, #ffb6c9 40%, #8336ff 80%);
+.login-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
-  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 2001;
+  pointer-events: none;
+  /* Allow clicks to pass through to overlay */
 }
 
 .login-card {
@@ -217,7 +229,45 @@ body {
   max-width: 400px;
   width: 90%;
   text-align: center;
+  pointer-events: auto;
+  /* Re-enable clicks for the card */
+  position: relative;
+  animation: modalPop 0.3s ease-out;
 }
+
+@keyframes modalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-modal-btn:hover {
+  color: #333;
+  background-color: #f3f3f3;
+}
+
+
 
 .login-logo {
   margin-bottom: 2rem;
@@ -245,6 +295,151 @@ body {
   text-align: center;
   color: #666;
   margin-bottom: 1.5rem;
+}
+
+
+/* Register Page Styles */
+.register-page {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #f6beff 0%, #c507ff 50%, #5c0aff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1500;
+  /* Above navbar */
+}
+
+.register-container {
+  background: #fff;
+  width: 100%;
+  max-width: 500px;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.register-header h2 {
+  margin: 0 0 0.5rem;
+  color: #1e293b;
+  font-size: 1.8rem;
+}
+
+.register-header p {
+  color: #64748b;
+  margin: 0;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.register-form label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.register-form input,
+.register-form select {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.register-form input:focus,
+.register-form select:focus {
+  outline: none;
+  border-color: #8400e9;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-register {
+  margin-top: 1rem;
+  background: #8400e9;
+  color: #fff;
+  border: none;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-register:hover {
+  background: #2563eb;
+}
+
+.btn-register:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.register-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.register-footer p {
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  margin-left: 0.25rem;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
 }
 
 .login-form {

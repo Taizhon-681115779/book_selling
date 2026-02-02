@@ -3,6 +3,7 @@ import "./App.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import ProductManager from "./components/ProductManager";
 import Login from "./components/Login";
+import Register from "./components/register";
 import Shop from "./components/Shop";
 import Cart from "./components/Cart";
 import Checkout from "./components/Checkout";
@@ -11,14 +12,14 @@ import ProductDetail from "./components/ProductDetail";
 
 // ========== NAVBAR COMPONENT ==========
 // Navigation bar displayed at top of page with logo, search, cart, and user menu
-function Navbar({ user, onLogout, cartCount, onViewCart, onLogoClick, onAdminClick }) {
+function Navbar({ user, onLogout, cartCount, onViewCart, onLogoClick, onAdminClick, onLoginClick, onSearch }) {
 	// State for search input value
 	const [query, setQuery] = useState("");
 
 	// Handle search form submission
 	function handleSubmit(e) {
 		e.preventDefault();
-		console.log("Search:", query);
+		onSearch(query);
 	}
 
 	return (
@@ -34,12 +35,12 @@ function Navbar({ user, onLogout, cartCount, onViewCart, onLogoClick, onAdminCli
 					<input
 						className="search-input"
 						type="search"
-						placeholder="Search..."
+						placeholder="ค้นหาหนังสือ..."
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						aria-label="Search site"
 					/>
-					<button className="search-button" type="submit">Search</button>
+					<button className="search-button" type="submit">ค้นหา</button>
 				</form>
 
 				{/* Right side actions - Cart button and User menu */}
@@ -62,7 +63,12 @@ function Navbar({ user, onLogout, cartCount, onViewCart, onLogoClick, onAdminCli
 							<span>สวัสดี, {user.name}</span>
 							<button onClick={onLogout} className="logout-btn">ออกจากระบบ</button>
 						</div>
-					) : null}
+					) : (
+						/* Show Login button if not logged in */
+						<button onClick={onLoginClick} className="cart-btn">
+							<i className="bi bi-person"></i> เข้าสู่ระบบ
+						</button>
+					)}
 				</div>
 
 				{/* Navigation links */}
@@ -82,11 +88,17 @@ function App() {
 	// Current logged-in user data
 	const [user, setUser] = useState(null);
 
+	// Login Modal Visibility State
+	const [isLoginVisible, setIsLoginVisible] = useState(false);
+
 	// Current view/page being displayed (shop, cart, checkout, orders, admin)
 	const [view, setView] = useState('shop');
 
 	// Shopping cart items
 	const [cart, setCart] = useState([]);
+
+	// Global Search Query
+	const [searchQuery, setSearchQuery] = useState("");
 
 	// User's order history
 	const [orders, setOrders] = useState([]);
@@ -158,16 +170,36 @@ function App() {
 	// ===== GO TO HOMEPAGE =====
 	// Navigate back to shop page (home)
 	function goToHomepage() {
-		if (user) {
-			setView('shop');
-			setSelectedProduct(null);
-		}
+		setView('shop');
+		setSelectedProduct(null);
+		setSearchQuery(""); // Reset search on home
 	}
 
 	// ===== VIEW PRODUCT DETAIL =====
 	function handleViewDetail(product) {
 		setSelectedProduct(product);
 		setView('product-detail');
+	}
+
+	// ===== HANDLE CHECKOUT CLICK =====
+	function handleCheckoutClick() {
+		if (!user) {
+			setIsLoginVisible(true);
+		} else {
+			setView('checkout');
+		}
+	}
+
+	// ===== HANDLE REGISTER =====
+	function handleRegister(userData) {
+		setUser(userData);
+		setView('shop');
+	}
+
+	// ===== HANDLE SEARCH =====
+	function handleSearch(query) {
+		setSearchQuery(query);
+		setView('shop'); // Ensure we are on shop view to see results
 	}
 
 	return (
@@ -180,53 +212,81 @@ function App() {
 				onViewCart={() => setView('cart')}
 				onLogoClick={goToHomepage}
 				onAdminClick={() => setView('admin')}
+				onLoginClick={() => setIsLoginVisible(true)}
+				onSearch={handleSearch}
 			/>
 
 			{/* Main content area - shows different pages based on view state */}
 			<main className="main-content">
-				{/* Show login page if not logged in */}
-				{!user ? (
-					<Login onLogin={setUser} />
+
+				{/* Show shop page (product listing) */}
+				{view === 'shop' ? (
+					<Shop
+						onAddToCart={addToCart}
+						onViewDetail={handleViewDetail}
+						searchQuery={searchQuery}
+					/>
 				)
-					// Show shop page (product listing)
-					: view === 'shop' ? (
-						<Shop onAddToCart={addToCart} onViewDetail={handleViewDetail} />
+					// Show product detail
+					: view === 'product-detail' && selectedProduct ? (
+						<ProductDetail
+							product={selectedProduct}
+							onBack={() => setView('shop')}
+							onAddToCart={addToCart}
+						/>
 					)
-						// Show product detail
-						: view === 'product-detail' && selectedProduct ? (
-							<ProductDetail
-								product={selectedProduct}
-								onBack={() => setView('shop')}
-								onAddToCart={addToCart}
+						// Show shopping cart
+						: view === 'cart' ? (
+							<Cart
+								items={cart}
+								onRemove={removeFromCart}
+								onCheckout={handleCheckoutClick}
+								coupons={coupons}
 							/>
 						)
-							// Show shopping cart
-							: view === 'cart' ? (
-								<Cart
-									items={cart}
-									onRemove={removeFromCart}
-									onCheckout={() => setView('checkout')}
-									coupons={coupons}
+							// Show checkout form
+							: view === 'checkout' ? (
+								<Checkout
+									cartItems={cart}
+									onConfirm={checkout}
+									onBack={() => setView('cart')}
 								/>
 							)
-								// Show checkout form
-								: view === 'checkout' ? (
-									<Checkout
-										cartItems={cart}
-										onConfirm={checkout}
-										onBack={() => setView('cart')}
-									/>
+								// Show orders history
+								: view === 'orders' ? (
+									<Orders orders={orders} onBack={() => setView('shop')} />
 								)
-									// Show orders history
-									: view === 'orders' ? (
-										<Orders orders={orders} onBack={() => setView('shop')} />
+									// Show admin panel (only for admin users)
+									: view === 'admin' && user?.role === 'admin' ? (
+										<ProductManager />
 									)
-										// Show admin panel (only for admin users)
-										: view === 'admin' && user?.role === 'admin' ? (
-											<ProductManager />
+										// Show Register page
+										: view === 'register' ? (
+											<Register
+												onRegister={handleRegister}
+												onLoginClick={() => {
+													setView('shop');
+													setIsLoginVisible(true);
+												}}
+											/>
 										)
 											: null}
 			</main>
+
+			{/* Login Modal */}
+			{isLoginVisible && (
+				<Login
+					onLogin={(userData) => {
+						setUser(userData);
+						setIsLoginVisible(false);
+					}}
+					onClose={() => setIsLoginVisible(false)}
+					onRegisterClick={() => {
+						setIsLoginVisible(false);
+						setView('register');
+					}}
+				/>
+			)}
 		</div>
 	);
 }

@@ -261,7 +261,7 @@ export default function ProductManager() {
             active.map((product) => (
               <div key={product.id} className="pm-item">
                 {/* Product image */}
-                <img src={product.images[0] || 'https://via.placeholder.com/80'} alt={product.title} />
+                <img src={(product.images && product.images[0]) || 'https://via.placeholder.com/80'} alt={product.title} />
 
                 {/* Product details */}
                 <div className="pm-item-details">
@@ -289,7 +289,7 @@ export default function ProductManager() {
               {closed.map((product) => (
                 <div key={product.id} className="pm-item pm-closed-item">
                   {/* Deleted product image */}
-                  <img src={product.images[0] || 'https://via.placeholder.com/80'} alt={product.title} />
+                  <img src={(product.images && product.images[0]) || 'https://via.placeholder.com/80'} alt={product.title} />
 
                   {/* Deleted product details */}
                   <div className="pm-item-details">
