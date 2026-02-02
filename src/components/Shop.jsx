@@ -38,13 +38,14 @@ const DEFAULT_BOOKS = [
 // ========== SHOP COMPONENT ==========
 // Product listing page with filtering and sorting capabilities
 // Displays books from admin-managed inventory (ProductManager)
-export default function Shop({ onAddToCart }) {
+export default function Shop({ onAddToCart, onViewDetail }) {
   // State: List of active books loaded from localStorage
   const [books, setBooks] = useState([]);
-  
+
   // Filter and sort state
-  const [filter, setFilter] = useState({ 
+  const [filter, setFilter] = useState({
     category: 'all', // Filter by book category
+    minPrice: '', // NEW: Min price filter
     maxPrice: '', // Maximum price filter
     sort: 'new' // Sort order (new, cheap, exp)
   });
@@ -66,17 +67,22 @@ export default function Shop({ onAddToCart }) {
   // Apply filters and sorting to product list
   function filtered() {
     let list = [...books];
-    
+
     // Filter by category
     if (filter.category !== 'all') {
       list = list.filter((b) => b.category === filter.category);
     }
-    
+
     // Filter by max price
     if (filter.maxPrice) {
       list = list.filter((b) => b.priceUsed <= Number(filter.maxPrice));
     }
-    
+
+    // NEW: Filter by min price
+    if (filter.minPrice) {
+      list = list.filter((b) => b.priceUsed >= Number(filter.minPrice));
+    }
+
     // Sort products
     if (filter.sort === 'cheap') {
       // Sort by price low to high
@@ -85,7 +91,7 @@ export default function Shop({ onAddToCart }) {
       // Sort by price high to low
       list.sort((a, b) => b.priceUsed - a.priceUsed);
     }
-    
+
     return list;
   }
 
@@ -105,12 +111,23 @@ export default function Shop({ onAddToCart }) {
         </select>
 
         {/* Max price filter input */}
-        <input
-          type="number"
-          placeholder="ราคาสูงสุด (มือสอง)"
-          value={filter.maxPrice}
-          onChange={(e) => setFilter({ ...filter, maxPrice: e.target.value })}
-        />
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <input
+            type="number"
+            placeholder="ราคาต่ำสุด"
+            value={filter.minPrice}
+            onChange={(e) => setFilter({ ...filter, minPrice: e.target.value })}
+            style={{ width: '100px' }}
+          />
+          -
+          <input
+            type="number"
+            placeholder="ราคาสูงสุด"
+            value={filter.maxPrice}
+            onChange={(e) => setFilter({ ...filter, maxPrice: e.target.value })}
+            style={{ width: '100px' }}
+          />
+        </div>
 
         {/* Sort order dropdown */}
         <select value={filter.sort} onChange={(e) => setFilter({ ...filter, sort: e.target.value })}>
@@ -125,35 +142,38 @@ export default function Shop({ onAddToCart }) {
         {/* Map through filtered books and display each as a card */}
         {filtered().map((book) => (
           <div key={book.id} className="book-card">
-            {/* Book image */}
-            <img src={book.image} alt={book.title} />
-            
+            {/* Book image - Clickable to view detail */}
+            <div onClick={() => onViewDetail(book)} style={{ cursor: 'pointer' }}>
+              <img src={book.image || (book.images && book.images[0]) || 'https://via.placeholder.com/200x300'} alt={book.title} />
+            </div>
+
             {/* Book title */}
-            <h3>{book.title}</h3>
-            
+            {/* Book title - Clickable */}
+            <h3 onClick={() => onViewDetail(book)} style={{ cursor: 'pointer' }}>{book.title}</h3>
+
             {/* Author name */}
             <p className="author">โดย {book.author}</p>
-            
+
             {/* Book category */}
             <p className="category">{book.category}</p>
-            
+
             {/* Rating and reviews */}
             <div className="rating">⭐ {book.rating} ({book.reviews} รีวิว)</div>
-            
+
             {/* Original and used prices */}
             <div className="prices">
               <span className="price-new">ปก: {book.priceNew}฿</span>
               <span className="price-used">มือสอง: {book.priceUsed}฿</span>
             </div>
-            
+
             {/* Book condition (scratches, markings, etc) */}
             <p className="condition">{book.condition}</p>
-            
+
             {/* Available stock */}
             <p className="stock">จำนวน: {book.stock}</p>
-            
+
             {/* Add to cart button */}
-            <button onClick={() => onAddToCart(book)} className="btn-primary">
+            <button onClick={(e) => { e.stopPropagation(); onAddToCart(book); }} className="btn-primary">
               <i className="bi bi-cart-plus"></i> ใส่ตะกร้า
             </button>
           </div>

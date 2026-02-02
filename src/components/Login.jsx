@@ -13,7 +13,8 @@ export default function Login({ onLogin }) {
         phone: '',
         password: '',
         confirmPassword: '',
-        role: 'customer' // Default role is customer, can be admin (seller)
+        role: 'customer', // Default role is customer, can be admin (seller)
+        creditBalance: 1000 // Mock initial credit for new users
     });
 
     // Loading state during form submission
@@ -50,7 +51,7 @@ export default function Login({ onLogin }) {
     // Check all required fields and formats
     function validateForm() {
         const { name, email, password, confirmPassword } = formData;
-        
+
         if (!name.trim()) return 'กรุณากรอกชื่อของคุณ';
         if (!email.trim()) return 'กรุณากรอกอีเมลของคุณ';
         if (!isValidEmail(email)) return 'รูปแบบอีเมลไม่ถูกต้อง';
@@ -58,7 +59,7 @@ export default function Login({ onLogin }) {
         if (password.length < 6) return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
         if (isSignUp && password !== confirmPassword) return 'รหัสผ่านไม่ตรงกัน';
         if (isSignUp && !formData.phone.trim()) return 'กรุณากรอกเบอร์โทรศัพท์';
-        
+
         return '';
     }
 
@@ -66,7 +67,7 @@ export default function Login({ onLogin }) {
     // Validate and submit login/signup form
     function handleSubmit(e) {
         e.preventDefault();
-        
+
         // Validate all fields
         const validationError = validateForm();
         if (validationError) {
@@ -76,14 +77,14 @@ export default function Login({ onLogin }) {
 
         // Show loading state
         setIsLoading(true);
-        
+
         // Simulate API call with small delay for better UX
         setTimeout(() => {
             setIsLoading(false);
             // Pass user data to parent component (App.jsx)
             onLogin(formData);
             // Reset form after successful submission
-            setFormData({ name: '', email: '', phone: '', password: '', confirmPassword: '', role: 'customer' });
+            setFormData({ name: '', email: '', phone: '', password: '', confirmPassword: '', role: 'customer', creditBalance: 1000 });
             setError('');
             setTouched({});
         }, 800);
@@ -98,8 +99,6 @@ export default function Login({ onLogin }) {
                 </div>
 
                 {/* App title and description */}
-                <h1>Book2Hand</h1>
-                <p>ระบบขายหนังสือมือสอง</p>
 
                 {/* Error message display */}
                 {error && <div className="error-message">{error}</div>}
@@ -202,7 +201,7 @@ export default function Login({ onLogin }) {
                     )}
 
                     {/* Submit button */}
-                    <button type="submit" className="btn-primary" disabled={isLoading}>
+                    <button type="submit" className="btn-primary" disabled={isLoading} style={{ textAlign: 'center', width: '100%' }}>
                         {isLoading ? 'กำลังดำเนินการ...' : (isSignUp ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ')}
                     </button>
                 </form>
