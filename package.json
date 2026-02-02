@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch backend/index.ts",
+    "dev:backend": "tsx watch backend/index.ts",
+    "dev:frontend": "vite"
   },
   "dependencies": {
     "react": "^19.2.0",
