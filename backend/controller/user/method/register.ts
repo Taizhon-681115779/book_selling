@@ -4,20 +4,31 @@ import { IUser } from "../../../types/user";
 
 export default async function register(data: IUser) {
   try {
-    // 1. เช็คว่า Username หรือ Email ซ้ำไหม 
-    const existingUser = await User.findOne({
-      $or: [{ username: data.username }, { email: data.email }]
-    });
+    // 1. เช็คความยาวรหัสผ่าน (ต้องครบ 16 ตัว)
+    if (data.password && data.password.length < 16) {
+      return errRes.BAD_REQUEST({ message: "รหัสผ่านต้องมีความยาวอย่างน้อย 16 ตัวอักษร" });
+    }
 
+    // 2. เช็คตัวอักษรพิมพ์ใหญ่ (ต้องมีอย่างน้อย 1 ตัว)
+    const hasUpperCase = /[A-Z]/.test(data.password || "");
+    if (!hasUpperCase) {
+      return errRes.BAD_REQUEST({ message: "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว" });
+    }
+
+    // --- Logic เดิมของคุณ ---
+    // เช็คว่า Username หรือ Email ซ้ำไหม
+    const existingUser = await User.findOne({ 
+      $or: [{ username: data.username }, { email: data.email }] 
+    });
+    
     if (existingUser) {
       return errRes.BAD_REQUEST({ message: "ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว" });
     }
 
-    // 2. สร้าง User ใหม่ (อย่าลืมใส่ creditBalance เริ่มต้นเป็น 0 ตามที่ออกแบบไว้) [cite: 42]
+    // สร้าง User ใหม่
     const newUser = await User.create(data);
     return successRes(newUser);
   } catch (error: any) {
-    console.log(`INTERNAL_SERVER_ERROR: ${error.message}`);
     return errRes.INTERNAL_SERVER_ERROR({ message: error.message });
   }
 }
